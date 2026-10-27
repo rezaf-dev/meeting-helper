@@ -101,7 +101,7 @@ It does not save audio recordings. Finalized captions and AI answers are saved l
 ./scripts/package-app.sh
 ```
 
-The package script creates a versioned ZIP, an installation DMG, and SHA-256 checksums in `dist/`. CI runs tests, the isolated history smoke test, and release packaging on a macOS 26 Apple Silicon runner. It uploads an Actions artifact. Pushing a version tag such as `v0.8.0` also publishes a GitHub Release with the DMG, ZIP, checksums, and generated release notes after all checks pass. See [release instructions](docs/BUILDING.md#automatic-github-releases).
+The package script creates a versioned ZIP, an installation DMG, and SHA-256 checksums in `dist/`. CI runs tests, the isolated history smoke test, and release packaging on a macOS 26 Apple Silicon runner. It uploads an Actions artifact. Pushing a version tag such as `v0.1.0` also publishes a GitHub Release with the DMG, ZIP, checksums, and generated release notes after all checks pass. See [release instructions](docs/BUILDING.md#automatic-github-releases).
 
 - [Build, diagnostics, and distribution](docs/BUILDING.md)
 - [Architecture](docs/IMPLEMENTATION.md)

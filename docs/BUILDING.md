@@ -69,24 +69,24 @@ This requires Apple's local speech service and assets. It uses synthetic audio w
 The outputs are `dist/MeetingHelper-<version>-macOS-<architecture>.zip` and `.dmg`, each with a matching `.sha256` file. The compressed, read-only DMG contains the app and an Applications shortcut for drag-and-drop installation. The script always builds release mode first and preserves bundle metadata with `ditto`, and verifies the DMG with `hdiutil`. Verify a downloaded archive from its directory:
 
 ```sh
-shasum -a 256 -c MeetingHelper-0.8.0-macOS-arm64.zip.sha256
-shasum -a 256 -c MeetingHelper-0.8.0-macOS-arm64.dmg.sha256
+shasum -a 256 -c MeetingHelper-0.1.0-macOS-arm64.zip.sha256
+shasum -a 256 -c MeetingHelper-0.1.0-macOS-arm64.dmg.sha256
 ```
 
 For each release:
 
 1. Update `CFBundleShortVersionString` and increment `CFBundleVersion` in `Resources/Info.plist`.
 2. Run the verification commands and relevant interactive checks. Document limitations in the release notes.
-3. Commit the source, tag that commit with the matching version (for example `v0.8.0`), and let CI validate it.
+3. Commit the source, tag that commit with the matching version (for example `v0.1.0`), and let CI validate it.
 4. Push the version tag. CI publishes the DMG, ZIP, checksums, and release notes automatically after all checks pass.
 
 ### Automatic GitHub releases
 
-Once the workflow and source changes are committed and pushed to `main`, publish version 0.8.0 with:
+Once the workflow and source changes are committed and pushed to `main`, publish version 0.1.0 with:
 
 ```sh
-git tag -a v0.8.0 -m "MeetingHelper v0.8.0"
-git push origin v0.8.0
+git tag -a v0.1.0 -m "MeetingHelper v0.1.0"
+git push origin v0.1.0
 ```
 
 Use a new `vMAJOR.MINOR.PATCH` tag for each release, matching `CFBundleShortVersionString` in `Resources/Info.plist`. The workflow rejects mismatched or prerelease tags before building. For subsequent releases, update the version and build number, commit and push those changes, then tag that commit.
