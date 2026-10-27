@@ -1,0 +1,31 @@
+# SwiftPM and local build products
+.build/
+.swiftpm/
+/dist/
+/graphify-out/
+
+# macOS and editor state
+.DS_Store
+.AppleDouble
+*.xcuserstate
+*.xcuserdata/
+.idea/
+.vscode/
+*.swp
+*~
+
+# Local credentials and signing material
+.env
+.env.*
+!.env.example
+*.p12
+*.p8
+*.mobileprovision
+*.provisionprofile
+
+# Local diagnostic output and recordings
+*.log
+*.aiff
+*.wav
+*.m4a
+*.pcm

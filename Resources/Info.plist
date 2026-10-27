@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key><string>MeetingHelper</string>
+    <key>CFBundleDisplayName</key><string>MeetingHelper</string>
+    <key>CFBundleIdentifier</key><string>com.meetinghelper.desktop</string>
+    <key>CFBundleExecutable</key><string>MeetingHelper</string>
+    <key>CFBundleIconFile</key><string>AppIcon.icns</string>
+    <key>CFBundlePackageType</key><string>APPL</string>
+    <key>CFBundleShortVersionString</key><string>0.8.0</string>
+    <key>CFBundleVersion</key><string>10</string>
+    <key>LSMinimumSystemVersion</key><string>26.0</string>
+    <key>NSHighResolutionCapable</key><true/>
+    <key>NSMicrophoneUsageDescription</key><string>Transcribe your microphone locally so you can follow and review your meeting.</string>
+    <key>NSSpeechRecognitionUsageDescription</key><string>Create live meeting captions using on-device speech recognition.</string>
+    <key>NSAudioCaptureUsageDescription</key><string>Transcribe system and meeting audio locally on your Mac.</string>
+</dict>
+</plist>

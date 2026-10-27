@@ -1,0 +1,44 @@
+name: macOS build and tests
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show toolchain
+        run: |
+          swift --version
+          xcrun --show-sdk-version
+      - name: Test core behavior
+        run: ./scripts/test.sh
+      - name: Test chat lifecycle without recording
+        run: ./scripts/chat-history-smoke-test.sh
+      - name: Build and package release app
+        run: ./scripts/package-app.sh
+      - name: Check build did not modify source assets
+        run: git diff --exit-code
+      - name: Upload app ZIP and installation DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: MeetingHelper-macOS-arm64
+          path: |
+            dist/*.zip
+            dist/*.dmg
+            dist/*.sha256
+          if-no-files-found: error
+          retention-days: 14
