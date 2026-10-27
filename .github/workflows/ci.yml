@@ -12,7 +12,8 @@ permissions:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Never interrupt a tag build or release upload when a run is retried.
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
   build:
@@ -20,6 +21,24 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+      - name: Validate release tag matches app version
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python3 - <<'PYTHON'
+          import os
+          import plistlib
+          import re
+          import sys
+
+          tag = os.environ["RELEASE_TAG"]
+          with open("Resources/Info.plist", "rb") as source:
+              version = plistlib.load(source)["CFBundleShortVersionString"]
+          if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+", tag) or tag != f"v{version}":
+              sys.exit(f"Release tag must be v{version}, matching Resources/Info.plist; got {tag!r}")
+          print(f"Validated release {tag}")
+          PYTHON
       - name: Show toolchain
         run: |
           swift --version
@@ -42,3 +61,49 @@ jobs:
             dist/*.sha256
           if-no-files-found: error
           retention-days: 14
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Download verified packages
+        uses: actions/download-artifact@v4
+        with:
+          name: MeetingHelper-macOS-arm64
+          path: dist
+      - name: Verify package checksums
+        working-directory: dist
+        run: sha256sum --check *.sha256
+      - name: Publish release with installers
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          cat > release-notes.md <<'NOTES'
+          ## Install
+
+          Requires an Apple Silicon Mac running macOS 26 or later.
+          Download the DMG, open it, and drag MeetingHelper into Applications.
+          A ZIP and SHA-256 checksums are also included.
+
+          These builds are ad-hoc signed and **not notarized**. Gatekeeper may block downloaded builds.
+          Live device capture and AI behavior should be checked with your meeting setup before relying on the app.
+
+          Local captions run on-device after Apple's speech assets are installed.
+          Optional AI help requires an OpenRouter API key and sends text only when enabled.
+
+          Built by [CoreFixLab](https://corefixlab.com). Get in touch for customizations or other projects.
+          NOTES
+          base="dist/MeetingHelper-${RELEASE_TAG#v}-macOS-arm64"
+          gh release create "$RELEASE_TAG" \
+            "$base.dmg" "$base.dmg.sha256" "$base.zip" "$base.zip.sha256" \
+            --verify-tag \
+            --title "MeetingHelper $RELEASE_TAG" \
+            --generate-notes \
+            --notes-file release-notes.md

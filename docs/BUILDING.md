@@ -58,7 +58,7 @@ This requires Apple's local speech service and assets. It uses synthetic audio w
 
 ## CI
 
-`.github/workflows/ci.yml` runs on pushes to `main`, version tags, pull requests, and manual dispatch. It uses GitHub's `macos-26` Apple Silicon runner, executes tests and the history probe, builds a release app, and uploads its ZIP, installation DMG, and checksums as an Actions artifact. It does not request recording permissions or run speech recognition. It does not publish a GitHub release.
+`.github/workflows/ci.yml` runs on pushes to `main`, version tags, pull requests, and manual dispatch. It uses GitHub's `macos-26` Apple Silicon runner, executes tests and the history probe, builds a release app, and uploads its ZIP, installation DMG, and checksums as an Actions artifact. It does not request recording permissions or run speech recognition. A version-tag push also publishes a GitHub Release after the build succeeds. Branch pushes, pull requests, and manual runs only build and upload Actions artifacts.
 
 ## Release archives
 
@@ -78,7 +78,22 @@ For each release:
 1. Update `CFBundleShortVersionString` and increment `CFBundleVersion` in `Resources/Info.plist`.
 2. Run the verification commands and relevant interactive checks. Document limitations in the release notes.
 3. Commit the source, tag that commit with the matching version (for example `v0.8.0`), and let CI validate it.
-4. Publish the DMG, ZIP, and checksums with release notes once the checks pass. This remains a manual maintainer step.
+4. Push the version tag. CI publishes the DMG, ZIP, checksums, and release notes automatically after all checks pass.
+
+### Automatic GitHub releases
+
+Once the workflow and source changes are committed and pushed to `main`, publish version 0.8.0 with:
+
+```sh
+git tag -a v0.8.0 -m "MeetingHelper v0.8.0"
+git push origin v0.8.0
+```
+
+Use a new `vMAJOR.MINOR.PATCH` tag for each release, matching `CFBundleShortVersionString` in `Resources/Info.plist`. The workflow rejects mismatched or prerelease tags before building. For subsequent releases, update the version and build number, commit and push those changes, then tag that commit.
+
+The build job runs tests, packages the app, and uploads its artifacts with read-only repository permissions. A separate job downloads those artifacts, verifies both checksums, and publishes the release using GitHub's built-in `GITHUB_TOKEN` with `contents: write`. No personal access token or signing secrets are needed. Repository or organization policies must allow Actions and that permission.
+
+Release notes include installation instructions, the notarization limitation, CoreFixLab attribution, and GitHub's generated change summary. A release is only attempted after successful checks; pushes to `main`, pull requests, and manual workflow dispatches do not publish. Existing releases are not overwritten. If publication fails, inspect the Actions logs and any partial draft before retrying; never move a published version tag to different source.
 
 The app in both packages is **ad-hoc signed, not notarized**. Creating a DMG does not bypass Gatekeeper. The current process does not produce a universal Intel/Apple Silicon build. Do not describe these archives as notarized releases or tell users to disable Gatekeeper globally.
 
